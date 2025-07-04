@@ -1,1 +1,109 @@
-<!-- Halaman admin -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - E.eon</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Panel Admin</h1>
+    <button onclick="logout()">Logout</button>
+  </header>
+
+  <main>
+    <section>
+      <h2>Verifikasi Deposit</h2>
+      <ul id="listDeposit"></ul>
+    </section>
+
+    <section>
+      <h2>Verifikasi Penarikan</h2>
+      <ul id="listWithdraw"></ul>
+    </section>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DB_URL",
+      projectId: "YOUR_PROJECT_ID",
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    function logout() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        loadDeposit();
+        loadWithdraw();
+      }
+    });
+
+    function loadDeposit() {
+      firebase.database().ref("deposit").on("value", (snapshot) => {
+        const list = document.getElementById("listDeposit");
+        list.innerHTML = "";
+        snapshot.forEach((child) => {
+          const data = child.val();
+          if (data.status === "pending") {
+            const item = document.createElement("li");
+            item.innerHTML = `${data.nama} - Rp ${data.jumlah} [${data.metode}] 
+              <button onclick="accDeposit('${child.key}', '${data.uid}', ${data.jumlah})">ACC</button>`;
+            list.appendChild(item);
+          }
+        });
+      });
+    }
+
+    function loadWithdraw() {
+      firebase.database().ref("withdraw").on("value", (snapshot) => {
+        const list = document.getElementById("listWithdraw");
+        list.innerHTML = "";
+        snapshot.forEach((child) => {
+          const data = child.val();
+          if (data.status === "pending") {
+            const item = document.createElement("li");
+            item.innerHTML = `${data.nama} - Rp ${data.jumlah}
+              <button onclick="accWithdraw('${child.key}', '${data.uid}', ${data.jumlah})">ACC</button>`;
+            list.appendChild(item);
+          }
+        });
+      });
+    }
+
+    function accDeposit(id, uid, jumlah) {
+      firebase.database().ref("users/" + uid + "/saldo").get().then((snap) => {
+        const currentSaldo = snap.val() || 0;
+        firebase.database().ref("users/" + uid + "/saldo").set(currentSaldo + jumlah);
+        firebase.database().ref("deposit/" + id + "/status").set("approved");
+        alert("Deposit di-ACC!");
+      });
+    }
+
+    function accWithdraw(id, uid, jumlah) {
+      firebase.database().ref("users/" + uid + "/saldo").get().then((snap) => {
+        const currentSaldo = snap.val() || 0;
+        if (currentSaldo >= jumlah) {
+          firebase.database().ref("users/" + uid + "/saldo").set(currentSaldo - jumlah);
+          firebase.database().ref("withdraw/" + id + "/status").set("approved");
+          alert("Penarikan di-ACC!");
+        } else {
+          alert("Saldo tidak cukup");
+        }
+      });
+    }
+  </script>
+</body>
+</html>
