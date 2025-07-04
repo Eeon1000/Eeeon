@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ajak Teman - E.eon</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Ajak Temanmu</h1>
+    <a href="dashboard.html">⬅ Kembali</a>
+  </header>
+
+  <main>
+    <section>
+      <p>Bagikan link ini ke temanmu:</p>
+      <input type="text" id="refLink" readonly>
+      <button onclick="copyLink()">Salin Link</button>
+    </section>
+
+    <section>
+      <h2>Komisi Referral</h2>
+      <ul id="komisiList"></ul>
+    </section>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DB_URL",
+      projectId: "YOUR_PROJECT_ID",
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) return location.href = "login.html";
+
+      const uid = user.uid;
+      const refLink = `${location.origin}/login.html?ref=${uid}`;
+      document.getElementById("refLink").value = refLink;
+
+      // Ambil komisi dari database
+      firebase.database().ref("komisi").on("value", (snap) => {
+        const list = document.getElementById("komisiList");
+        list.innerHTML = "";
+        snap.forEach((child) => {
+          const data = child.val();
+          if (data.ref === uid) {
+            const li = document.createElement("li");
+            li.textContent = `${data.nama} - Komisi: Rp${data.komisi}`;
+            list.appendChild(li);
+          }
+        });
+      });
+    });
+
+    function copyLink() {
+      const link = document.getElementById("refLink");
+      link.select();
+      document.execCommand("copy");
+      alert("Link disalin!");
+    }
+  </script>
+</body>
+</html>
