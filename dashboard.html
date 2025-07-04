@@ -106,3 +106,41 @@
   </script>
 </body>
 </html>
+<main>
+  <section>
+    <h2>Saldo Anda</h2>
+    <p id="saldo">Rp 0</p>
+  </section>
+
+  <section>
+    <h2>Deposit</h2>
+    <form id="depositForm">
+      <label for="nama">Nama Pengirim</label>
+      <input type="text" id="nama" required>
+
+      <label for="jumlah">Jumlah Deposit (minimal 10.000)</label>
+      <input type="number" id="jumlah" required>
+
+      <label for="metode">Metode Pembayaran</label>
+      <select id="metode" required>
+        <option value="qris">QRIS</option>
+      </select>
+
+      <button type="submit">Lanjutkan</button>
+    </form>
+
+    <div id="qrisSection" style="display:none">
+      <p>Silakan scan QRIS di bawah ini:</p>
+      <img src="img/qris.png" alt="QRIS" width="200">
+      <p><small>Setelah transfer, klik tombol di bawah</small></p>
+      <button onclick="konfirmasiBayar()">Saya sudah bayar</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Menu Lain</h2>
+    <a href="riwayat.html">📜 Riwayat Transaksi</a><br>
+    <a href="penarikan.html">💸 Penarikan</a><br>
+    <a href="referal.html">👥 Ajak Teman</a>
+  </section>
+</main>
