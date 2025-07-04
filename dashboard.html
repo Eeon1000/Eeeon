@@ -1,1 +1,108 @@
-<!-- Halaman dashboard -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - E.eon</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Dashboard Pengguna</h1>
+    <button onclick="logout()">Logout</button>
+  </header>
+
+  <main>
+    <section>
+      <h2>Saldo Anda</h2>
+      <p id="saldo">Rp 0</p>
+    </section>
+
+    <section>
+      <h2>Deposit</h2>
+      <form id="depositForm">
+        <label for="nama">Nama Pengirim</label>
+        <input type="text" id="nama" required>
+
+        <label for="jumlah">Jumlah Deposit (minimal 10.000)</label>
+        <input type="number" id="jumlah" required>
+
+        <label for="metode">Metode Pembayaran</label>
+        <select id="metode" required>
+          <option value="qris">QRIS</option>
+        </select>
+
+        <button type="submit">Lanjutkan</button>
+      </form>
+
+      <div id="qrisSection" style="display:none">
+        <p>Silakan scan QRIS di bawah ini:</p>
+        <img src="img/qris.png" alt="QRIS" width="200">
+        <p><small>Setelah transfer, klik tombol di bawah</small></p>
+        <button onclick="konfirmasiBayar()">Saya sudah bayar</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DB_URL",
+      projectId: "YOUR_PROJECT_ID",
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const user = firebase.auth().currentUser;
+    const saldoElem = document.getElementById("saldo");
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) window.location.href = "login.html";
+      else {
+        firebase.database().ref("users/" + user.uid + "/saldo").on("value", (snap) => {
+          saldoElem.innerText = "Rp " + (snap.val() || 0);
+        });
+      }
+    });
+
+    function logout() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "login.html";
+      });
+    }
+
+    const depositForm = document.getElementById("depositForm");
+    depositForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      document.getElementById("qrisSection").style.display = "block";
+    });
+
+    function konfirmasiBayar() {
+      const nama = document.getElementById("nama").value;
+      const jumlah = parseInt(document.getElementById("jumlah").value);
+      const metode = document.getElementById("metode").value;
+
+      if (!nama || !jumlah || jumlah < 10000) {
+        alert("Masukkan data yang valid!");
+        return;
+      }
+
+      const user = firebase.auth().currentUser;
+      firebase.database().ref("deposit/" + Date.now()).set({
+        uid: user.uid,
+        nama,
+        jumlah,
+        metode,
+        status: "pending"
+      }).then(() => {
+        alert("Deposit berhasil dikirim, tunggu verifikasi admin.");
+        document.getElementById("depositForm").reset();
+        document.getElementById("qrisSection").style.display = "none";
+      });
+    }
+  </script>
+</body>
+</html>
