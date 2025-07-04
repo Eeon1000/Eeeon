@@ -1,1 +1,71 @@
-<!-- Halaman riwayat -->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riwayat Transaksi</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Riwayat Transaksi</h1>
+    <a href="dashboard.html">⬅ Kembali</a>
+  </header>
+
+  <main>
+    <section>
+      <h2>Deposit</h2>
+      <ul id="riwayatDeposit"></ul>
+    </section>
+    <section>
+      <h2>Penarikan</h2>
+      <ul id="riwayatWithdraw"></ul>
+    </section>
+  </main>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DB_URL",
+      projectId: "YOUR_PROJECT_ID",
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) return location.href = 'login.html';
+
+      const uid = user.uid;
+
+      firebase.database().ref('deposit').on('value', (snap) => {
+        const ul = document.getElementById('riwayatDeposit');
+        ul.innerHTML = '';
+        snap.forEach((child) => {
+          const d = child.val();
+          if (d.uid === uid) {
+            const li = document.createElement('li');
+            li.textContent = `${d.nama} - Rp${d.jumlah} [${d.status}]`;
+            ul.appendChild(li);
+          }
+        });
+      });
+
+      firebase.database().ref('withdraw').on('value', (snap) => {
+        const ul = document.getElementById('riwayatWithdraw');
+        ul.innerHTML = '';
+        snap.forEach((child) => {
+          const d = child.val();
+          if (d.uid === uid) {
+            const li = document.createElement('li');
+            li.textContent = `${d.nama} - Rp${d.jumlah} [${d.status}]`;
+            ul.appendChild(li);
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
