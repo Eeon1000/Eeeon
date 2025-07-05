@@ -1,6 +1,6 @@
 js/firebase-config.js
 const firebaseConfig = {
-  apiKey: "AIzaSyDgC4tContohABC",
+  apiKey: "AIzaSyBTwYwLXrIGMnMXBfckO10yUal597XU-HY",
 authDomain: "eeeon.firebaseapp.com",
 projectId: "eeeon",
   storageBucket: "Eeeon.appspot.com",
