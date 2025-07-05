@@ -1,9 +1,8 @@
 js/firebase-config.js
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "Eeeon.firebaseapp.com",
-  databaseURL: "https://Eeeon.firebaseio.com",
-  projectId: "Eeeon",
+  apiKey: "AIzaSyDgC4tContohABC",
+authDomain: "eeeon.firebaseapp.com",
+projectId: "eeeon",
   storageBucket: "Eeeon.appspot.com",
   messagingSenderId: "SENDER_ID",
   appId: "APP_ID"
